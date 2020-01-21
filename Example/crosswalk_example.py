@@ -44,4 +44,6 @@ merged['Population'] = merged['weight'] * merged['AYM001']
 ## aggregating to 2010 counties
 output = merged.groupby(['NHGISST_2010', 'NHGISCTY_2010', 'STATENAM_2010', 'NHGISNAM_2010'])['Population'].sum().reset_index()
 
+output.to_csv('example_output.csv', index = False)
+
 print(output['Population'].sum())
