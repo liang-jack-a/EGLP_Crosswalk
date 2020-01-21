@@ -20,14 +20,6 @@ os.chdir('..')
 ## keeping only the relevant year, 1900
 cw = cw[cw['Year'] == 1900]
 
-## renormalizing
-a = cw.groupby(['NHGISST', 'NHGISCTY'])['weight'].sum().reset_index()
-a['b'] = a['weight']
-a = a.drop('weight', axis =1)
-cw =cw.merge(a, left_on = ['NHGISST', 'NHGISCTY'], right_on =  ['NHGISST', 'NHGISCTY'])
-cw['weight'] = cw['weight'] / cw['b']
-
-
 ## setting up the county correspondence: 
 ## it is "STATEA" and "COUNTYA" in pop
 ## and "NHGISST" and "NHGISCTY" in cw
