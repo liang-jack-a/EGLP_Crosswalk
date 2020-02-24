@@ -1,9 +1,13 @@
 import pandas as pd
 import geopandas as gpd
 import os
+from os.path import join,split
 import time
 
-path = '/Users/jackliang/Dropbox/Current/EGP_Liang/'
+import numpy as np
+
+path = split(__file__)[0]
+root = split(path)[0]
 
 os.chdir(path)
 
@@ -34,7 +38,7 @@ def fix_2010(shp, cw = cw):
 
 
 ## reading the cz shapefile
-os.chdir(path + '/Shapefiles/cz1990_shapefile')
+os.chdir(join(root,"Shapefiles","cz1990_shapefile"))
 shp_end = gpd.GeoDataFrame.from_file('cz1990.shp')
     
 ## fixing the projection
@@ -59,7 +63,7 @@ for year in other_years:
     start = time.time() ## for testing purposes
     
     ## reading in shapefiles
-    os.chdir(path + '/Shapefiles/nhgis0010_shapefile_tl2000_us_county_' + year)
+    os.chdir(join(root,"Shapefiles","nhgis0010_shapefile_tl2000_us_county_" + year))
     shp = gpd.GeoDataFrame.from_file('US_county_' + year + '.shp')
     
     if year == '2010':
@@ -103,3 +107,6 @@ for year in other_years:
 ## saving output
 os.chdir(path)
 master_df.to_csv('cz_crosswalk.csv', index= False)
+
+#--- Uncomment to auto-open ---
+# os.system('cz_crosswalk.csv')

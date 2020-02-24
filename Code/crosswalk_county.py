@@ -1,9 +1,12 @@
 import pandas as pd
 import geopandas as gpd
 import os
+from os.path import join,split
 import time
+import numpy as np
 
-path = '/Users/jackliang/Dropbox/Current/EGP_Liang/'
+path = split(__file__)[0]
+root = split(path)[0]
 
 os.chdir(path)
 
@@ -35,7 +38,7 @@ end_year = '2010'
 ## reading the end year
 ## if you want to use a different end year, change appropriate strings
 ## and variable names
-os.chdir(path + '/Shapefiles/nhgis0010_shapefile_tl2000_us_county_' + end_year)
+os.chdir(join(root,"Shapefiles","nhgis0010_shapefile_tl2000_us_county_" + end_year))
 shp_end = gpd.GeoDataFrame.from_file('US_county_' + end_year + '.shp')
 
 if end_year == '2010':
@@ -65,7 +68,7 @@ for year in other_years:
     start = time.time() ## for testing purposes
     
     ## reading in shapefiles
-    os.chdir(path + '/Shapefiles/nhgis0010_shapefile_tl2000_us_county_' + year)
+    os.chdir(join(root,"Shapefiles","nhgis0010_shapefile_tl2000_us_county_" + year))
     shp = gpd.GeoDataFrame.from_file('US_county_' + year + '.shp')
     
     if year == '2010':
@@ -111,4 +114,8 @@ for year in other_years:
 
 ## saving output
 os.chdir(path)
-master_df.to_csv('county_crosswalk_endyr_' + end_year + '.csv', index= False)
+output_filename = 'county_crosswalk_endyr_' + end_year + '.csv'
+master_df.to_csv(output_filename, index= False)
+
+#--- Uncomment to auto-open ---
+# os.system(output_filename)

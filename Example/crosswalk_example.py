@@ -1,21 +1,19 @@
 ## A simple example demonstrating how to map 1900 population data to 2010 counties
 
 import pandas as pd
-import geopandas as gpd
 import os
+from os.path import join,split
 
-path = '/Users/jackliang/Dropbox/Current/EGP_Liang/'
-
+root = split(split(__file__)[0])[0]
+Crosswalks_dir = join(root,"Crosswalks")
+Example_dir    = join(root,"Example")
+os.chdir(Example_dir)
 
 ## reading in data
-os.chdir(path)
-cw = pd.read_csv('county_crosswalk_endyr_2010.csv')
 
-os.chdir('Example/Data')
-pop = pd.read_csv('nhgis0014_ds31_1900_county.csv')
+cw = pd.read_csv(join(Crosswalks_dir,'county_crosswalk_endyr_2010.csv'))
 
-os.chdir('..')
-
+pop = pd.read_csv(join(Example_dir,"Data",'nhgis0014_ds31_1900_county.csv'))
 
 ## keeping only the relevant year, 1900
 cw = cw[cw['Year'] == 1900]
@@ -45,5 +43,7 @@ merged['Population'] = merged['weight'] * merged['AYM001']
 output = merged.groupby(['NHGISST_2010', 'NHGISCTY_2010', 'STATENAM_2010', 'NHGISNAM_2010'])['Population'].sum().reset_index()
 
 output.to_csv('example_output.csv', index = False)
-
 print(output['Population'].sum())
+
+#--- Uncomment to auto-open ---
+# os.system('example_output.csv')
