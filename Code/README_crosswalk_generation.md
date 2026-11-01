@@ -1,22 +1,44 @@
 # EGLP_Crosswalk: Code
 
-We provide three sets of code that, in combination with shapefiles that can be found [here](http://fpeckert.me/eglp/), produce the crosswalks found in the Crosswalks folder. 
+The code needs Python 3.10 or later and the packages in `requirements.txt` (pandas, numpy, geopandas and its dependencies). Install them with `pip install -r requirements.txt`.
 
-In order to run any of the code, one must use Python version 3.4 or later. Additionally, the packages [pandas](https://pandas.pydata.org/), [numpy](https://numpy.org/) and [geopandas](http://geopandas.org/) are all necessary. Additional packages including os and time (pre-installed in any python installation) are also useful.
+## The county and commuting zone crosswalks
 
-The first two sets of code, 'crosswalk_county.py' and 'crosswalk_cz.py', generate crosswalks mapping historic counties to modern day counties and commuting zones, respectively. These crosswalks can be found in the Crosswalks folder.
+`crosswalk_county.py` builds the crosswalk from historical counties to 1990 or 2010 counties. `crosswalk_cz.py` builds the crosswalk from historical counties to 1990 commuting zones. Run them from the repository root:
 
-Beyond what is described in the paper, these files perform some operations that should be noted. First, due to the 2010 shapefile being of a slightly different format (in terms of column names), we perform some modifications to the 2010 shapefile. This also involves using the file 'state_name_cw.csv' to map FIPS codes in 2010 states to state names.
+```
+python Code/crosswalk_county.py --end-year 1990
+python Code/crosswalk_county.py --end-year 2010
+python Code/crosswalk_cz.py
+```
 
-Second, we loop through a large range of years and create, for each historic year, a crosswalk mapping the historic year to the modern year. This in principle creates several crosswalks which we stack on top of each other to create the master crosswalk. As demonstrated in the example, when using the crosswalk, it is necessary to specify only one reporting year when performing the mapping, and thus keep only rows with that year.
+By default they read the shapefiles from `Shapefiles/` (see `Shapefiles/HowToAcquireShapeFiles.txt`) and write to `Crosswalks/`. Use `--shapefiles` and `--out` to point elsewhere.
 
-Third, we create an indicator for each region that indicates if the region is, in the historical year, a US state. This involves the file 'states_union.csv'. 
+For each census year from 1790 to 2010, the scripts intersect that year's county map with the reference map, compute the area of each piece, and divide it by the area of the historical county. They drop pieces of 10 square meters or less, which come from small mismatches between the maps rather than real boundary changes, and rescale the remaining weights so that the weights of each historical county sum to one. The crosswalks for all years are stacked in one file; keep only the rows of the year you need.
 
-Finally, for the commuting zone code, we find that the commuting zone shapefile has a different projection than the files downloaded from NHGIS, which follow the TIGER line concordance (which uses the NAD83 projection system). As such, in lines 41 to 50, we remedy this by re-projecting the commuting zone shapefile to NAD83.
+Beyond what the paper describes, the scripts do three things:
 
+1. The 2010 shapefile uses different column names. The scripts rename them to the NHGIS names and use `state_name_cw.csv` to add state names. In the 2010 map, `NHGISST` is the NHGIS state code (the FIPS code with a zero appended), `NHGISCTY` is the three-digit FIPS county code, and the ICPSR codes are empty. Puerto Rico is dropped.
+2. They add `US_STATE`, which is 1 if the historical county lies in a state that was part of the Union in that year. The years of accession are in `states_union.csv`. The District of Columbia is not a state and always gets 0.
+3. The commuting zone shapefile is in longitude and latitude. `crosswalk_cz.py` projects it to the projection of the NHGIS maps (USA Contiguous Albers Equal Area, NAD83) before intersecting.
 
-The third code provides a way to use two generic shapefiles to create a crosswalk. For the code to be usable, one must first ensure that the two shapefiles are intersecting (as otherwise the crosswalk would clearly be empty), and use the same projection system. For an example of how to change the projection system of a shapefile in python, see the 'crosswalk_cz.py' file. 
+`check_crosswalks.py` compares a rebuilt crosswalk with a posted one and reports any pairs and weights that differ:
 
-To create the crosswalk, one must specify some variables. Primarily these are file paths and file names, however, two variables, reporting_geoid and reference_geoid, are of critical importance. For each shapefile, it is necessary to have some unique identifier for each region. In the historic data, this role was filled by the NHGISST and NHGISCTY codes, and the cz column in the commuting zone shapefile. If multiple columns uniquely identify the geography, as in the case of historic counties, we suggest combining the two columns in an intuitive way, however, for an example where we keep the columns as is, see the 'crosswalk_county.py' file. 
+```
+python Code/check_crosswalks.py Crosswalks/county_crosswalk_endyr_2010.csv /tmp/county_crosswalk_endyr_2010.csv 2010
+```
 
-The file generated will contain only three columns: the reporting_geoid, the reference_geoid, and the weight. For an example of how to use such a crosswalk, see the Example folder. 
+## A crosswalk between any two maps
+
+`crosswalk_generic.py` builds a crosswalk between any two maps of the same territory. Fill in the values in capitals at the top of the file, as described in Appendix B of the paper:
+
+- `PATH_REPORTING`, `REPORTING_FNAME`: the folder and file name of the map your data come in.
+- `PATH_REFERENCE`, `REFERENCE_FNAME`: the folder and file name of the map you want the data on.
+- `REPORTING_GEOID`, `REFERENCE_GEOID`: the column in each map that identifies its units. They may have the same name; the output then calls them `<name>_reporting` and `<name>_reference`.
+- `OUTPUT_PATH`, `OUTPUT_FNAME`: where to save the crosswalk.
+
+Both maps need a coordinate system (a `.prj` file). The script projects both to one projection before measuring areas: the reporting map's own projection if it has one, otherwise the equal-area EPSG:6933. Set `area_crs` to choose another; for US maps the NHGIS projection `ESRI:102003` is a good choice, because it preserves areas. Set `min_area` to drop slivers, as the county crosswalks do with 10 square meters.
+
+The output has three columns: the reporting ID, the reference ID, and the weight. The weight is the share of the reporting unit's area that lies in the reference unit. For an example of how to use a crosswalk, see the Example folder.
+
+With the NHGIS 1900 and 2010 county maps, `GISJOIN` and `GEOID10` as IDs, `min_area = 10`, this script gives the same weights as the posted 2010 county crosswalk for 1900.

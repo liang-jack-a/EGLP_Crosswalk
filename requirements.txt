@@ -1,3 +1,7 @@
-pandas
-geopandas
-numpy
+# Tested on 2026-11-01 with Python 3.14; these versions reproduce the posted crosswalks.
+geopandas==1.2.0
+shapely==2.2.0
+pyogrio==0.13.0
+pyproj==3.8.0
+pandas==3.1.0
+numpy==2.5.4
