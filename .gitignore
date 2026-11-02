@@ -2,3 +2,5 @@
 __pycache__/
 Shapefiles/*/
 Shapefiles/*.zip
+Crosswalks/Stata/*.dta
+*.log

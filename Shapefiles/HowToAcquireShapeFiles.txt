@@ -1,9 +1,13 @@
-The scripts expect the shapefiles in this folder, one subfolder per map:
+The scripts look in this folder, and in all folders inside it, for 24 files:
 
-    Shapefiles/nhgis0010_shapefile_tl2000_us_county_1790/US_county_1790.shp
-    Shapefiles/nhgis0010_shapefile_tl2000_us_county_1800/US_county_1800.shp
+    US_county_1790.shp, US_county_1800.shp, ..., US_county_2010.shp   (23 NHGIS county maps)
+    cz1990.shp                                                       (1990 commuting zones)
+
+Folder names do not matter. Each map must be present once. For example:
+
+    Shapefiles/nhgis0110_shapefile_tl2000_us_county_1790/US_county_1790.shp
     ...
-    Shapefiles/nhgis0010_shapefile_tl2000_us_county_2010/US_county_2010.shp
+    Shapefiles/nhgis0110_shapefile_tl2010_us_county_2010/US_county_2010.shp
     Shapefiles/cz1990_shapefile/cz1990.shp
 
 County shapefiles (NHGIS)
@@ -14,7 +18,7 @@ For all years before 2010 we use the shapefiles with the "2000 TIGER/Line +" bas
 
 NHGIS updates its data every year, and later versions of the shapefiles may differ in details. NHGIS archives each version under a DOI. We used the 2019 release, DOI 10.18128/D050.V14.0 (http://doi.org/10.18128/D050.V14.0). The version history is at https://ipums.org/projects/ipums-nhgis.
 
-To download them: in the NHGIS data finder, select all decennial years under Years and only County under Geographic Levels. The GIS Files tab then lists the county shapefiles; pick the basis given above for each year. Unzip each into its own subfolder here, keeping the NHGIS folder names.
+To download them: in the NHGIS data finder, select all decennial years under Years and only County under Geographic Levels. The GIS Files tab then lists the county shapefiles; pick the basis given above for each year. NHGIS delivers one zip that holds one zip per map; unzip each map's zip into its own folder here (e.g. with the zip's name as the folder name). Its files are called US_county_<year>.shp etc.
 
 Commuting zone shapefile
 
