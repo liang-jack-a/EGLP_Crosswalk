@@ -1,1 +1,21 @@
-The  NHGIS  data  repository  is  updated  every  year  and  in  future  versions  some  details  of  the  shapefiles  maychange.  However, NHGIS assigns a Digital Object Identifier (DOI) code to each version of its data and archives it.The version history for NHGIS is found athttps://ipums.org/projects/ipums-nhgis.  We used the 2019 versionin our work which has been assigned the following DOI code:  10.18128/D050.V14.0
+The scripts expect the shapefiles in this folder, one subfolder per map:
+
+    Shapefiles/nhgis0010_shapefile_tl2000_us_county_1790/US_county_1790.shp
+    Shapefiles/nhgis0010_shapefile_tl2000_us_county_1800/US_county_1800.shp
+    ...
+    Shapefiles/nhgis0010_shapefile_tl2000_us_county_2010/US_county_2010.shp
+    Shapefiles/cz1990_shapefile/cz1990.shp
+
+County shapefiles (NHGIS)
+
+We use 23 county shapefiles from NHGIS (https://www.nhgis.org), one for each census year 1790, 1800, ..., 2010. A free NHGIS account is needed to download them.
+
+For all years before 2010 we use the shapefiles with the "2000 TIGER/Line +" basis. No such file exists for 2010, so for 2010 we use the "2010 TIGER/Line +" basis.
+
+NHGIS updates its data every year, and later versions of the shapefiles may differ in details. NHGIS archives each version under a DOI. We used the 2019 release, DOI 10.18128/D050.V14.0 (http://doi.org/10.18128/D050.V14.0). The version history is at https://ipums.org/projects/ipums-nhgis.
+
+To download them: in the NHGIS data finder, select all decennial years under Years and only County under Geographic Levels. The GIS Files tab then lists the county shapefiles; pick the basis given above for each year. Unzip each into its own subfolder here, keeping the NHGIS folder names.
+
+Commuting zone shapefile
+
+The 1990 commuting zone shapefile (cz1990_shapefile) comes from the Health Inequality Project, https://healthinequality.org/data/. A copy is posted at https://www.fpeckert.me/eglp.

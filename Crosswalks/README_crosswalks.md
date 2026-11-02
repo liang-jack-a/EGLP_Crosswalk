@@ -1,18 +1,24 @@
 # EGLP_Crosswalk: Crosswalks
 
-We provide a series of three crosswalks: for each year y in 1790, 1800, 1810, ..., 2010, we map counties in the year y to 1990 counties, 2010 counties, and 1990 commuting zones<sup>1</sup>.  Obviously we do not map 1990 counties to 1990 counties, nor do we map 2010 counties to 2010 counties.
+There are three crosswalks. For each census year from 1790 to 2010, they map that year's counties to 1990 counties (`county_crosswalk_endyr_1990.csv`), to 2010 counties (`county_crosswalk_endyr_2010.csv`), and to 1990 commuting zones (`cz_crosswalk.csv`)<sup>1</sup>. The 1990 county file has no rows for 1990 and the 2010 county file has no rows for 2010, since those maps would map to themselves.
 
-For each crosswalk, we identify counties by two sets of codes: NHGIS codes, and ICPSR codes, when available. NHGIS codes are a strict superset of FIPS codes, in the sense that when both NHGIS and FIPS codes exist, the NHGIS code is equal to the FIPS code with an additional zero. ICPSR codes are not always available: in particular, in 2010 the county files do not contain ICPSR codes. 
+All years are stacked in one file. Keep only the rows of the year of your data (column `Year`).
 
-For simplicity, we also provide state (or territory) names, along with county names. We also provide an indicator if the (historical) geographic region is part of a US state. 
+## Identifiers
 
-We provide the areas of relevant regions, in square meters. The 'area_base' column denotes the total area of the historic county, and 'area' provides the area of the intersection of the historic county and the modern county or commuting zone. Areas less than 10 square meters are suppressed. 
+Historical counties are identified by NHGIS codes (`NHGISST`, `NHGISCTY`) and, where they exist, ICPSR codes (`ICPSRST`, `ICPSRCTY`). For counties that have a FIPS code, the NHGIS code is the FIPS code with a zero appended: FIPS state 51 is NHGIS state 510, and FIPS county 650 is NHGIS county 6500. Counties that no longer exist have NHGIS codes but no FIPS codes.
 
-For an example of how to use the crosswalk, see the Example folder.
+The reference counties are identified the same way, with a suffix for the reference year, with two exceptions in the 2010 file:
 
+- `NHGISCTY_2010` is the three-digit FIPS county code (650), not the four-digit NHGIS code (6500). `NHGISST_2010` is the NHGIS state code (510).
+- `ICPSRST_2010` and `ICPSRCTY_2010` are empty, because ICPSR codes do not exist for 2010 counties.
 
+The files also give state and county names (`STATENAM`, `NHGISNAM`). `US_STATE` is 1 if the historical county lies in a state that was part of the Union in that year, and 0 if it lies in a territory. The District of Columbia always has `US_STATE` = 0.
 
+## Areas and weights
 
+`area_base` is the area of the historical county and `area` is the area of the piece that lies in the reference unit, both in square meters. `weight` is the share of the historical county's area that lies in the reference unit; the weights of each historical county sum to one. Pieces of 10 square meters or less are dropped in all three files.
 
+To move a stock variable such as population to the reference map, multiply each historical county's value by its weights and sum within reference units. For averages, use `area` to compute the share of each reference unit's area that comes from each historical county. See the Example folder.
 
-<sup>1</sup> We use the 1990 commuting zone shapefile provided by The Health Inequality Project here: https://healthinequality.org/data/
+<sup>1</sup> We use the 1990 commuting zone shapefile of the Health Inequality Project: https://healthinequality.org/data/
