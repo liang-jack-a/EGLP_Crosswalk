@@ -21,6 +21,13 @@ Beyond what the paper describes, the scripts do three things:
 1. The 2010 shapefile uses different column names. The scripts rename them to the NHGIS names and use `state_name_cw.csv` to add state names. In the 2010 map, `NHGISST` is the NHGIS state code (the FIPS code with a zero appended), `NHGISCTY` is the three-digit FIPS county code, and the ICPSR codes are empty. Puerto Rico is dropped.
 2. They add `US_STATE`, which is 1 if the historical county lies in a state that was part of the Union in that year. The years of accession are in `states_union.csv`. The District of Columbia is not a state and always gets 0.
 3. The commuting zone shapefile is in longitude and latitude. `crosswalk_cz.py` projects it to the projection of the NHGIS maps (USA Contiguous Albers Equal Area, NAD83) before intersecting.
+4. They add ready-made merge keys with `merge_keys.py`: `GISJOIN` for the historical unit and, in the county crosswalks, `GISJOIN_<year>` and the five-digit `FIPS_<year>` for the reference county. They are computed from the NHGIS codes and equal the GISJOIN codes of the NHGIS shapefiles.
+
+`make_stata_files.py` writes the zipped Stata versions of the three crosswalks in `Crosswalks/Stata/`, with variable labels:
+
+```
+python Code/make_stata_files.py
+```
 
 `check_crosswalks.py` compares a rebuilt crosswalk with a posted one and reports any pairs and weights that differ:
 

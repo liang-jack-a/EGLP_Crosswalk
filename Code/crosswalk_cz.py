@@ -10,6 +10,9 @@ Usage (from the repository root):
 The NHGIS county shapefiles and the commuting zone shapefile (cz1990_shapefile, from
 https://healthinequality.org/data/) must sit in the Shapefiles folder, as described in
 Shapefiles/HowToAcquireShapeFiles.txt. The output is written to Crosswalks/cz_crosswalk.csv.
+
+The steps are those of crosswalk_county.py, with the 1990 commuting zones as the reference
+map. Every census year from 1790 to 2010 is included, 1990 and 2010 too.
 """
 import argparse
 import os
@@ -18,13 +21,15 @@ import time
 import pandas as pd
 import geopandas as gpd
 
-from crosswalk_county import YEARS, MIN_AREA, read_year
+from crosswalk_county import YEARS, read_year, crosswalk_one_year
+from merge_keys import add_merge_keys
 
 CODE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(CODE_DIR)
 
-# The commuting zone shapefile is in longitude-latitude (EPSG:4326). The NHGIS shapefiles use
-# the USA Contiguous Albers Equal Area projection (NAD83). Reproject the commuting zones to it.
+# The commuting zone shapefile is in longitude and latitude (EPSG:4326). The NHGIS maps use the
+# USA Contiguous Albers Equal Area projection (NAD83), in meters. The commuting zones are moved to
+# that projection, so that the two maps line up and areas come out in square meters.
 NHGIS_ALBERS = {'proj': 'aea', 'lat_1': 29.5, 'lat_2': 45.5, 'lat_0': 37.5, 'lon_0': -96,
                 'x_0': 0, 'y_0': 0, 'datum': 'NAD83', 'units': 'm', 'no_defs': True}
 
@@ -38,30 +43,21 @@ def main():
     state_names = pd.read_csv(os.path.join(CODE_DIR, 'state_name_cw.csv'))
     states = pd.read_csv(os.path.join(CODE_DIR, 'states_union.csv'))
 
+    # The reference map: 1990 commuting zones, identified by the column cz.
     shp_end = gpd.read_file(os.path.join(args.shapefiles, 'cz1990_shapefile', 'cz1990.shp'))
     shp_end = shp_end.to_crs(NHGIS_ALBERS)
 
+    # One crosswalk per census year, computed exactly as for the county crosswalks.
     parts = []
     for year in YEARS:
         start = time.time()
         shp = read_year(args.shapefiles, year, state_names)
-        shp['Year'] = year
-        shp['area_base'] = shp.area
-        temp = gpd.overlay(shp, shp_end, how='intersection')
-        temp['area'] = temp.area
-        temp['weight'] = temp['area'] / temp['area_base']
-        temp = temp[['Year', 'NHGISST', 'NHGISCTY', 'STATENAM', 'NHGISNAM', 'ICPSRST', 'ICPSRCTY',
-                     'area_base', 'cz', 'area', 'weight']]
-        # drop slivers of 10 square meters or less, as in the county crosswalks
-        temp = temp[temp['area'] > MIN_AREA]
-        temp['weight'] = temp['weight'] / temp.groupby(['NHGISCTY', 'NHGISST'])['weight'].transform('sum')
-        in_union = states.loc[states[year] == 1, 'State'].str.strip()
-        temp['US_STATE'] = temp['STATENAM'].isin(in_union).astype(int)
-        parts.append(pd.DataFrame(temp))
+        parts.append(crosswalk_one_year(shp, shp_end, year, ['cz'], states))
         print(year, round(time.time() - start, 1), 'seconds', flush=True)
 
+    # Stack the years, add the merge key GISJOIN and save.
     out = os.path.join(args.out, 'cz_crosswalk.csv')
-    pd.concat(parts, ignore_index=True).to_csv(out, index=False)
+    add_merge_keys(pd.concat(parts, ignore_index=True)).to_csv(out, index=False)
     print('saved', out)
 
 

@@ -17,7 +17,9 @@ import warnings
 
 import geopandas as gpd
 
-## defining variables - change the things in ALL_CAPS
+# ---------------------------------------------------------------------------
+# Settings: replace the values in ALL_CAPS
+# ---------------------------------------------------------------------------
 reporting_path = 'PATH_REPORTING'     # folder that holds the reporting shapefile
 reporting_fname = 'REPORTING_FNAME'   # e.g. 'US_county_1900.shp'
 reporting_geoid = 'REPORTING_GEOID'   # column that identifies each reporting unit
@@ -38,6 +40,7 @@ area_crs = None       # projection used to measure areas. None: use the reportin
 
 
 def read_map(path, fname, geoid):
+    """Read one map and keep only its ID column and its polygons, after checking both."""
     shp = gpd.read_file(os.path.join(path, fname))
     if geoid not in shp.columns:
         raise KeyError(f"{fname} has no column '{geoid}'. Its columns are: {list(shp.columns)}")
@@ -51,10 +54,12 @@ def read_map(path, fname, geoid):
 
 
 def main():
+    # Step 1: read the two maps.
     shp_reporting = read_map(reporting_path, reporting_fname, reporting_geoid)
     shp_reference = read_map(reference_path, reference_fname, reference_geoid)
 
-    # both maps must use the same projection, and areas must be measured in an equal-area one
+    # Step 2: put both maps in one projection. Areas are measured in it, so it should preserve
+    # areas (an "equal-area" projection); otherwise the weights are distorted.
     crs = area_crs
     if crs is None:
         crs = shp_reporting.crs if shp_reporting.crs.is_projected else 'EPSG:6933'
@@ -64,30 +69,34 @@ def main():
     shp_reporting = shp_reporting.to_crs(crs)
     shp_reference = shp_reference.to_crs(crs)
 
-    # the two ID columns may have the same name (e.g. GEOID in both maps): keep them apart
+    # The two ID columns may have the same name (e.g. GEOID in both maps): keep them apart.
     rep_id, ref_id = reporting_geoid, reference_geoid
     if rep_id == ref_id:
         rep_id, ref_id = rep_id + '_reporting', ref_id + '_reference'
         shp_reporting = shp_reporting.rename(columns={reporting_geoid: rep_id})
         shp_reference = shp_reference.rename(columns={reference_geoid: ref_id})
 
+    # Step 3: the area of each reporting unit, measured before the overlay.
     shp_reporting['area_base'] = shp_reporting.area
 
-    ## intersecting the two maps
+    # Step 4: overlay the maps. Each row of the result is a piece that lies in exactly one
+    # reporting unit and one reference unit.
     intersect = gpd.overlay(shp_reporting, shp_reference, how='intersection')
     if intersect.empty:
         raise ValueError("The two maps do not overlap. Check that they cover the same territory.")
+    # Step 5: drop pieces of min_area or less (slivers where the two maps draw the same
+    # boundary slightly differently).
     intersect['area'] = intersect.area
     intersect = intersect[intersect['area'] > min_area]
 
-    ## computing weights
+    # Step 6: the weight is the share of the reporting unit's area that lies in the piece.
     intersect['weight'] = intersect['area'] / intersect['area_base']
 
-    ## renormalizing weights so that each reporting unit's weights sum to one. Without this,
-    ## small gaps where the two maps do not line up exactly would lose a little of each unit.
+    # Step 7: rescale so that each reporting unit's weights sum to one. Without this, small gaps
+    # where the two maps do not line up exactly would lose a little of each unit.
     intersect['weight'] = intersect['weight'] / intersect.groupby(rep_id)['weight'].transform('sum')
 
-    ## saving output
+    # Step 8: save one row per piece: reporting ID, reference ID, weight.
     output = intersect[[rep_id, ref_id, 'weight']]
     output.to_csv(os.path.join(output_path, output_fname), index=False)
     print(f"saved {len(output)} rows to {os.path.join(output_path, output_fname)}")
