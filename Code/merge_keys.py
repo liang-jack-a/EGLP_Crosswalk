@@ -5,6 +5,8 @@ GISJOIN is the identifier NHGIS puts in every county data extract and shapefile:
 for Autauga County, Alabama. It is added for the historical unit (GISJOIN) and, in the county
 crosswalks, for the reference county (GISJOIN_1990, GISJOIN_2010).
 
+All NHGIS state codes are written with three digits (e.g. 010).
+
 FIPS_1990 and FIPS_2010 are the five-digit FIPS codes of the reference county (two-digit state,
 three-digit county, e.g. 01001), as text with leading zeros, the form most modern data use.
 
@@ -22,6 +24,10 @@ def add_merge_keys(cw, end=None):
     Returns a copy with the new columns placed next to the codes they are built from."""
     cw = cw.copy()
     cols = list(cw.columns)
+    # Write every NHGIS state code with three digits (010, not 10). The 2010 map's codes come
+    # in as numbers and would otherwise lose the leading zero in the csv files.
+    for c in ['NHGISST'] + ([f'NHGISST_{end}'] if end is not None else []):
+        cw[c] = _digits(cw[c], 3)
     cw['GISJOIN'] = 'G' + _digits(cw['NHGISST'], 3) + _digits(cw['NHGISCTY'], 4)
     # in the rows for 2010, NHGISCTY holds the three-digit FIPS county code, as in the 2010 shapefile
     y2010 = cw['Year'].astype(int) == 2010

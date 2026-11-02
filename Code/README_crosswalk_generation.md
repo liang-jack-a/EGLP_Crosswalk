@@ -32,6 +32,7 @@ python Code/make_stata_files.py
 `check_crosswalks.py` compares a rebuilt crosswalk with a posted one and reports any pairs and weights that differ:
 
 ```
+python Code/crosswalk_county.py --end-year 2010 --out /tmp
 python Code/check_crosswalks.py Crosswalks/county_crosswalk_endyr_2010.csv /tmp/county_crosswalk_endyr_2010.csv 2010
 ```
 

@@ -38,7 +38,8 @@ drop _merge
 * 4. Split each county's population by the weights and add up within 2010 counties.
 generate double population = AYM001 * weight
 * Note: collapse (sum) counts missing values as zero, so a 2010 county that only overlaps 1900 units
-* without data gets 0.
+* without data gets 0. To keep such counties missing, add (count) n = population to the collapse and
+* then: replace population = . if n == 0
 collapse (sum) population, by(FIPS_2010 STATENAM_2010 NHGISNAM_2010)
 summarize population, meanonly
 display "1900 population after mapping to 2010 counties: " %15.0fc r(sum)

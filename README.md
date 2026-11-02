@@ -7,7 +7,7 @@ This repository is the home of the crosswalk files and code; the website links h
 ## Using a crosswalk in four steps
 
 1. Pick the file for the map you want your data on: 1990 counties, 2010 counties, or 1990 commuting zones. Keep the rows whose `Year` is the census year of your data (or the nearest census year).
-2. Merge your data onto the crosswalk. Data from NHGIS carry a `GISJOIN` column, which the crosswalk has too. Otherwise merge on the NHGIS state and county codes, `NHGISST` and `NHGISCTY` (in NHGIS extracts they are called `STATEA` and `COUNTYA` and stored as text with leading zeros, e.g. `010` and `0010`; in the crosswalk's rows for 2010, `NHGISCTY` is the three-digit FIPS county code). Check which rows did not match: units that are not on that year's NHGIS map drop out.
+2. Merge your data onto the crosswalk. For data from NHGIS, merge on `GISJOIN`, which every NHGIS extract and the crosswalk both have. Otherwise merge on the NHGIS state and county codes in the crosswalk, `NHGISST` and `NHGISCTY` (in the crosswalk's rows for 2010, `NHGISCTY` is the three-digit FIPS county code). Check which rows did not match: units that are not on that year's NHGIS map drop out.
 3. Multiply each variable that is a count (population, payroll, farms) by `weight`.
 4. Add up within the units of the new map: `FIPS_2010` or `FIPS_1990` (five-digit FIPS codes, as most modern data use them) or `cz`.
 

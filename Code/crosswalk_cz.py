@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--shapefiles', default=os.path.join(ROOT, 'Shapefiles'))
     parser.add_argument('--out', default=os.path.join(ROOT, 'Crosswalks'))
     args = parser.parse_args()
+    os.makedirs(args.out, exist_ok=True)
 
     state_names = pd.read_csv(os.path.join(CODE_DIR, 'state_name_cw.csv'))
     states = pd.read_csv(os.path.join(CODE_DIR, 'states_union.csv'))
