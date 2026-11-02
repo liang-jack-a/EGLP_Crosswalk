@@ -8,7 +8,7 @@ Usage (from the repository root):
     python Code/crosswalk_cz.py --shapefiles /path/to/Shapefiles
 
 The NHGIS county shapefiles and the commuting zone shapefile (cz1990_shapefile, from
-https://healthinequality.org/data/) must sit in the Shapefiles folder, as described in
+https://healthinequality.org/data/) must sit in the Shapefiles folder (in any subfolders), as described in
 Shapefiles/HowToAcquireShapeFiles.txt. The output is written to Crosswalks/cz_crosswalk.csv.
 
 The steps are those of crosswalk_county.py, with the 1990 commuting zones as the reference
@@ -21,7 +21,7 @@ import time
 import pandas as pd
 import geopandas as gpd
 
-from crosswalk_county import YEARS, read_year, crosswalk_one_year
+from crosswalk_county import YEARS, find_shapefile, read_year, crosswalk_one_year
 from merge_keys import add_merge_keys
 
 CODE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +44,7 @@ def main():
     states = pd.read_csv(os.path.join(CODE_DIR, 'states_union.csv'))
 
     # The reference map: 1990 commuting zones, identified by the column cz.
-    shp_end = gpd.read_file(os.path.join(args.shapefiles, 'cz1990_shapefile', 'cz1990.shp'))
+    shp_end = gpd.read_file(find_shapefile(args.shapefiles, 'cz1990.shp'))
     shp_end = shp_end.to_crs(NHGIS_ALBERS)
 
     # One crosswalk per census year, computed exactly as for the county crosswalks.

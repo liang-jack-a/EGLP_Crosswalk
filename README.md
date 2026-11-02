@@ -7,7 +7,7 @@ This repository is the home of the crosswalk files and code; the website links h
 ## Using a crosswalk in four steps
 
 1. Pick the file for the map you want your data on: 1990 counties, 2010 counties, or 1990 commuting zones. Keep the rows whose `Year` is the census year of your data (or the nearest census year).
-2. Merge your data onto the crosswalk. Data from NHGIS carry a `GISJOIN` column, which the crosswalk has too. Otherwise merge on the NHGIS state and county codes, `NHGISST` and `NHGISCTY`.
+2. Merge your data onto the crosswalk. Data from NHGIS carry a `GISJOIN` column, which the crosswalk has too. Otherwise merge on the NHGIS state and county codes, `NHGISST` and `NHGISCTY` (in NHGIS extracts they are called `STATEA` and `COUNTYA` and stored as text with leading zeros, e.g. `010` and `0010`; in the crosswalk's rows for 2010, `NHGISCTY` is the three-digit FIPS county code). Check which rows did not match: units that are not on that year's NHGIS map drop out.
 3. Multiply each variable that is a count (population, payroll, farms) by `weight`.
 4. Add up within the units of the new map: `FIPS_2010` or `FIPS_1990` (five-digit FIPS codes, as most modern data use them) or `cz`.
 
@@ -21,9 +21,12 @@ df["population"] = df["population"] * df["weight"]
 out = df.groupby("FIPS_2010", as_index=False)["population"].sum()
 ```
 
-In Stata (unzip the file in `Crosswalks/Stata/` once with `unzipfile`; `mydata.dta` has one row per 1900 county, with `GISJOIN` and `population`):
+In Stata, with `mydata.dta` holding one row per 1900 county with `GISJOIN` and `population` (`unzipfile` unpacks into the current folder, hence the `cd`):
 
 ```stata
+cd "Crosswalks/Stata"
+unzipfile "county_crosswalk_endyr_2010.dta.zip", replace
+cd "../.."
 use if Year == 1900 using "Crosswalks/Stata/county_crosswalk_endyr_2010.dta", clear
 merge m:1 GISJOIN using "mydata.dta", keep(match) nogenerate
 generate double population_2010 = population * weight
@@ -43,7 +46,7 @@ collapse (sum) population_2010, by(FIPS_2010)
 
 ## Running the code
 
-Install the packages with `pip install -r requirements.txt` (Python 3.10 or later). Put the shapefiles in `Shapefiles/`, then run from the repository root:
+Using the posted crosswalks needs only pandas (or Stata). Building them needs Python 3.12 or later and the packages in `requirements.txt`: `pip install -r requirements.txt`. Put the shapefiles in `Shapefiles/` (see `Shapefiles/HowToAcquireShapeFiles.txt`), then run from the repository root:
 
 ```
 python Code/crosswalk_county.py --end-year 1990

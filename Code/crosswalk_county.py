@@ -7,8 +7,8 @@ Usage (from the repository root):
     python Code/crosswalk_county.py --end-year 2010
     python Code/crosswalk_county.py --end-year 1990 --shapefiles /path/to/Shapefiles
 
-The NHGIS county shapefiles must sit in the Shapefiles folder, one subfolder per year,
-as described in Shapefiles/HowToAcquireShapeFiles.txt. The output is written to
+The NHGIS county shapefiles (US_county_<year>.shp) must sit in the Shapefiles folder, in any
+subfolders, as described in Shapefiles/HowToAcquireShapeFiles.txt. The output is written to
 Crosswalks/county_crosswalk_endyr_<END_YEAR>.csv.
 
 What the script does, for each census year from 1790 to 2010 (except the reference year):
@@ -24,6 +24,7 @@ What the script does, for each census year from 1790 to 2010 (except the referen
 The years are then stacked into one file, with ready-made merge keys (merge_keys.py).
 """
 import argparse
+import glob
 import os
 import time
 
@@ -44,13 +45,25 @@ MIN_AREA = 10  # pieces of 10 square meters or less are dropped (paper, Appendix
 HISTORICAL_COLS = ['NHGISST', 'NHGISCTY', 'STATENAM', 'NHGISNAM', 'ICPSRST', 'ICPSRCTY']
 
 
+def find_shapefile(shapefile_dir, name):
+    """Find the file `name` anywhere under shapefile_dir. NHGIS names the folders after each
+    user's extract number (nhgis0010_..., nhgis0110_...), but the files inside are always called
+    US_county_<year>.shp, so the scripts search for the file name, not the folder."""
+    hits = sorted(glob.glob(os.path.join(shapefile_dir, '**', name), recursive=True))
+    if not hits:
+        raise FileNotFoundError(f"{name} not found under {shapefile_dir}. "
+                                "See Shapefiles/HowToAcquireShapeFiles.txt.")
+    if len(hits) > 1:
+        raise ValueError(f"{name} found more than once under {shapefile_dir}: {hits}. Keep one copy.")
+    return hits[0]
+
+
 def read_year(shapefile_dir, year, state_names):
     """Read the NHGIS county map of one census year.
 
     All maps share one projection (USA Contiguous Albers Equal Area, NAD83), in meters,
     so the areas computed below are in square meters."""
-    folder = os.path.join(shapefile_dir, 'nhgis0010_shapefile_tl2000_us_county_' + year)
-    shp = gpd.read_file(os.path.join(folder, 'US_county_' + year + '.shp'))
+    shp = gpd.read_file(find_shapefile(shapefile_dir, 'US_county_' + year + '.shp'))
     if year == '2010':
         shp = fix_2010(shp, state_names)
     return shp
@@ -64,7 +77,7 @@ def fix_2010(shp, state_names):
     - NHGISCTY stays the three-digit FIPS county code (the NHGIS code would add a zero).
     - State names come from state_name_cw.csv. Puerto Rico is not in that file and drops out.
     - ICPSR codes do not exist for 2010 counties and are left empty."""
-    shp = shp[['STATEFP10', 'COUNTYFP10', 'NAME10', 'geometry']]
+    shp = shp[['STATEFP10', 'COUNTYFP10', 'NAME10', 'geometry']].copy()
     shp = shp.rename(columns={'STATEFP10': 'NHGISST', 'COUNTYFP10': 'NHGISCTY', 'NAME10': 'NHGISNAM'})
     shp['NHGISST'] = (shp['NHGISST'] + '0').astype(int)
     shp = shp.merge(state_names, on='NHGISST')

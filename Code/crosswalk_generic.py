@@ -10,10 +10,10 @@ The output is a csv file with three columns: the ID of the reporting unit, the I
 reference unit, and the weight. The weight is the share of the reporting unit's area that lies
 in the reference unit, so the weights of each reporting unit sum to one. Multiply a stock
 variable (population, payroll) of each reporting unit by the weights and sum within reference
-units to move the data to the reference map.
+units to move the data to the reference map. When reading the output, read the ID columns
+as text (e.g. pd.read_csv(..., dtype=str)) so that codes such as FIPS keep their leading zeros.
 """
 import os
-import warnings
 
 import geopandas as gpd
 
@@ -35,8 +35,16 @@ output_fname = 'OUTPUT_FNAME'         # e.g. 'crosswalk_1900_2010.csv'
 min_area = 0          # drop intersections of this area or less (in square meters when the
                       # area projection is in meters; the county crosswalks use 10)
 area_crs = None       # projection used to measure areas. None: use the reporting map's own
-                      # projection if it is projected, otherwise the equal-area EPSG:6933.
+                      # projection if it preserves areas, otherwise the equal-area EPSG:6933.
                       # For US maps, the NHGIS projection 'ESRI:102003' is a good choice.
+
+
+def is_equal_area(crs):
+    """True if the projection preserves areas (Albers, Lambert azimuthal, cylindrical equal-area...)."""
+    try:
+        return crs.is_projected and 'equal area' in crs.coordinate_operation.method_name.lower()
+    except AttributeError:
+        return False
 
 
 def read_map(path, fname, geoid):
@@ -62,10 +70,12 @@ def main():
     # areas (an "equal-area" projection); otherwise the weights are distorted.
     crs = area_crs
     if crs is None:
-        crs = shp_reporting.crs if shp_reporting.crs.is_projected else 'EPSG:6933'
-        if shp_reporting.crs.is_projected:
-            warnings.warn(f"Measuring areas in the reporting map's projection ({shp_reporting.crs.name}). "
-                          "Set area_crs if that projection is not equal-area.")
+        if is_equal_area(shp_reporting.crs):
+            crs = shp_reporting.crs           # e.g. the NHGIS maps (USA Contiguous Albers Equal Area)
+        else:
+            crs = 'EPSG:6933'                 # worldwide equal-area projection
+            print(f"Measuring areas in EPSG:6933 (equal-area), not in the reporting map's "
+                  f"{shp_reporting.crs.name}. Set area_crs to choose another equal-area projection.")
     shp_reporting = shp_reporting.to_crs(crs)
     shp_reference = shp_reference.to_crs(crs)
 
@@ -104,7 +114,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# If you get OSErrors from shapely, there is a problem with your environment.
-# A fix is described here: https://github.com/conda-forge/shapely-feedstock/issues/64
-# Thank you to Daniel Bischof for pointing out this problem and finding the solution.

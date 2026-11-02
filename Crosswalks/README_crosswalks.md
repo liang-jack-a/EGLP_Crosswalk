@@ -25,11 +25,11 @@ The files also give state and county names (`STATENAM`, `NHGISNAM`). `US_STATE` 
 
 ## Stata files
 
-`Stata/` holds the same three crosswalks as Stata files, zipped to keep the repository small. In Stata, `unzipfile "county_crosswalk_endyr_2010.dta.zip"` unpacks one. Every variable has a label. The merge keys are text; the NHGIS and ICPSR codes are numbers.
+`Stata/` holds the same three crosswalks as Stata files, zipped to keep the repository small. `unzipfile` unpacks into Stata's current folder, so change to that folder first: `cd "Crosswalks/Stata"`, then `unzipfile "county_crosswalk_endyr_2010.dta.zip", replace`. Every variable has a label. The merge keys are text; the NHGIS and ICPSR codes are numbers.
 
 ## Areas and weights
 
-`area_base` is the area of the historical county and `area` is the area of the piece that lies in the reference unit, both in square meters. `weight` is the share of the historical county's area that lies in the reference unit; the weights of each historical county sum to one. Pieces of 10 square meters or less are dropped in all three files.
+`area_base` is the area of the historical county and `area` is the area of the piece that lies in the reference unit, both in square meters. Pieces of 10 square meters or less are dropped. `weight` is the share of the historical county's area within the reference map that lies in the reference unit: the areas of the pieces kept, divided by their sum, so that the weights of each historical county sum to one. It equals `area / area_base` when the whole county lies on the reference map. Where it does not (for example, where two maps draw a coastline differently, or a slice of the county is cut off by a dropped sliver), the weights are scaled up to sum to one; in the 2010 file the difference is below 1% of the county's area for 98% of county-decades.
 
 To move a stock variable such as population to the reference map, multiply each historical county's value by its weights and sum within reference units. For averages, use `area` to compute the share of each reference unit's area that comes from each historical county. See the Example folder for complete scripts in Python and Stata.
 

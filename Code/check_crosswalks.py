@@ -43,4 +43,6 @@ def main(posted, rebuilt, kind):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) != 4 or sys.argv[3] not in ('1990', '2010', 'cz'):
+        sys.exit(__doc__)
     main(*sys.argv[1:4])
