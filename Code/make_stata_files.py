@@ -32,6 +32,8 @@ def labels(end):
         'area_base': 'Area of historical unit, square meters',
         'area': f'Area of historical unit in {ref}, sq. meters',
         'weight': f'Share of historical unit area in {ref}',
+        'weight_livable': f'Share of historical unit livable land in {ref}',
+        'weight_population': f'Share of historical unit people in {ref}',
         'US_STATE': '1 if historical unit is in a state of the Union',
         'cz': 'Commuting zone of 1990 (Tolbert and Sizer 1996)',
     }
@@ -61,7 +63,7 @@ def main():
         for c in cw.columns:
             if c not in text:
                 cw[c] = pd.to_numeric(cw[c])
-                if c not in ('area', 'area_base', 'weight') and cw[c].notna().all():
+                if c not in ('area', 'area_base', 'weight', 'weight_livable', 'weight_population') and cw[c].notna().all():
                     cw[c] = pd.to_numeric(cw[c], downcast='integer')
         for c in [c for c in text if c in cw.columns]:
             cw[c] = cw[c].fillna('')

@@ -25,7 +25,7 @@ print('1900 population before mapping:', pop['AYM001'].sum())
 
 # 3. Merge on GISJOIN. Each 1900 county gets one row per 2010 county it overlaps.
 #    Report the units that do not match before dropping them: they are not on the NHGIS 1900 map
-#    (here 70 units, 12 of them with population data: 30,552 people, about half in Alexandria City, Virginia).
+#    (here 69 units, 11 of them with population data: 16,024 people).
 merged = pop.merge(cw, on='GISJOIN', how='left', indicator=True)
 unmatched = merged[merged['_merge'] == 'left_only']
 print(f"not on the 1900 map: {len(unmatched)} units, {unmatched['AYM001'].notna().sum()} of them with population data, "

@@ -6,6 +6,10 @@ Usage:
 It matches rows on the historical county and the reference unit and reports pairs found in only
 one file, the largest differences in weights and areas, and rows whose names, ICPSR codes,
 merge keys or Union flag differ.
+
+It checks the area-based crosswalk, which crosswalk_county.py and crosswalk_cz.py build. The posted files
+also hold the livable-area and population-based weights; those two columns, and the few rows that exist only
+for them (with an empty or zero area), are left out of the comparison.
 """
 import sys
 
@@ -17,6 +21,8 @@ def main(posted, rebuilt, kind):
     # Read codes as text so that leading zeros survive.
     a = pd.read_csv(posted, dtype={c: str for c in codes}, low_memory=False)
     b = pd.read_csv(rebuilt, dtype={c: str for c in codes}, low_memory=False)
+    # The area-based crosswalk only: drop the columns and rows of the other two weights.
+    a = a[a['area'] > 0].drop(columns=['weight_livable', 'weight_population'], errors='ignore')
     print(f"rows: posted {len(a)}, rebuilt {len(b)}; same columns: {list(a.columns) == list(b.columns)}")
     # Match rows on the historical county, the year and the reference unit.
     ref = ['cz'] if kind == 'cz' else [f'NHGISST_{kind}', f'NHGISCTY_{kind}']

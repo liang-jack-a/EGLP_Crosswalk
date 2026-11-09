@@ -2,5 +2,7 @@
 __pycache__/
 Shapefiles/*/
 Shapefiles/*.zip
+Inputs/*/
+Intermediate/
 Crosswalks/Stata/*.dta
 *.log

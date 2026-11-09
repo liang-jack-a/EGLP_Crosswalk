@@ -1,0 +1,47 @@
+The livable-area and population-based weights (livable_land.py, towns.py, crosswalk_county_population.py,
+crosswalk_cz_population.py) read these files from this folder, in addition to the shapefiles in Shapefiles/:
+
+    Inputs/gmted2010/*_gmted_mea075.tif                   (elevation, five tiles)
+    Inputs/usgs_hydrography/hydr48m010g.gdb               (water bodies)
+    Inputs/usgs_major_dams/dams00x020.shp                 (major dams, with its .dbf, .shx, .prj)
+    Inputs/city_populations/1790-2010_MASTER.csv          (town populations)
+    Inputs/gnis/DomesticNames_<state>.txt                 (place names and points, one file per state)
+    Inputs/nhgis/nhgis_ts_nominal_county.csv              (census population of every county)
+
+All of them are public and free. A free NHGIS account is needed for the last one.
+
+Elevation (USGS GMTED2010)
+
+Mean elevation at 7.5 arc-seconds, the five tiles that cover the contiguous United States:
+10N090W, 10N120W, 30N090W, 30N120W and 30N150W. Each is a file <tile>_20101117_gmted_mea075.tif in the
+subfolder W090, W120 or W150 of
+https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo/downloads/GMTED/Global_tiles_GMTED/075darcsec/mea/
+
+Water bodies (National Atlas)
+
+1:1,000,000-Scale Hydrographic Geodatabase of the United States, Conterminous United States
+(hydr48m010g, 2014). Unpack
+https://prd-tnm.s3.amazonaws.com/StagedProducts/Small-scale/data/Hydrography/hydr48m010g.gdb_nt00893.tar.gz
+
+Major dams (National Atlas)
+
+Major Dams of the United States (dams00x020, 2006). Unpack
+https://prd-tnm.s3.amazonaws.com/StagedProducts/Small-scale/data/Hydrography/dams00x020_nt00010.tar.gz
+
+Town populations (US Historical City Populations)
+
+Census counts of US towns and cities 1790-2010, compiled by Erik Steiner and Jason Heppler, Spatial History
+Project, Stanford University. The file 1790-2010_MASTER.csv of
+https://github.com/cestastanford/historical-us-city-populations
+
+Place names (USGS GNIS)
+
+Geographic Names Information System, domestic names, one file DomesticNames_<state>.txt per state, from
+https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/DomesticNames/
+
+County population (NHGIS)
+
+Time series table A00 (total population) for nominal counties, 1790-2010, as a csv file, from
+https://www.nhgis.org. In the NHGIS data finder, select Time Series Tables, table A00 "Total Population",
+geographic level County, and the "Nominal" (not standardized) layout. Save the file as
+nhgis_ts_nominal_county.csv.

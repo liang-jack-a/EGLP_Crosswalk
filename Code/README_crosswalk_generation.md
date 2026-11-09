@@ -1,6 +1,6 @@
 # EGLP_Crosswalk: Code
 
-The code needs Python 3.12 or later and the packages in `requirements.txt` (pandas, numpy, geopandas and its dependencies). Install them with `pip install -r requirements.txt`.
+The code needs Python 3.12 or later and the packages in `requirements.txt` (pandas, numpy, geopandas and its dependencies; rasterio and scipy for the livable-area and population-based weights). Install them with `pip install -r requirements.txt`.
 
 ## The county and commuting zone crosswalks
 
@@ -35,6 +35,24 @@ python Code/make_stata_files.py
 python Code/crosswalk_county.py --end-year 2010 --out /tmp
 python Code/check_crosswalks.py Crosswalks/county_crosswalk_endyr_2010.csv /tmp/county_crosswalk_endyr_2010.csv 2010
 ```
+
+## The livable-area and population-based weights
+
+Four scripts add two more weights to the three crosswalks, as the columns `weight_livable` and `weight_population`. They need the inputs listed in `Inputs/HowToAcquireInputs.txt` and write their own intermediate files to `Intermediate/`. Run them from the repository root, after the area-based crosswalks:
+
+```
+python Code/livable_land.py
+python Code/towns.py
+python Code/crosswalk_county_population.py --end-year 1990
+python Code/crosswalk_county_population.py --end-year 2010
+python Code/crosswalk_cz_population.py
+```
+
+- `livable_land.py` builds the map of livable land on a grid of 250 meter squares: land that is not a natural water body of 1 square kilometer or more, not above 3,500 meters and not steeper than 15 degrees. Reservoirs count as land.
+- `towns.py` builds the list of towns, with their census populations from the US Historical City Populations list and their locations from USGS GNIS, and corrects it where the census record is clear.
+- `crosswalk_county_population.py` and `crosswalk_cz_population.py` place each historical county's people on a grid of 500 meter cells and add up the people of each piece of the county, using `population_weights.py`. The towns sit at their locations. The rural population (everyone outside the towns) is spread evenly over livable land in 2010; going back one census at a time, each county's rural population is spread in proportion to the rural population of the same cells at the next census. Thin strips along county lines that hold no town get no people. The weights are the shares of the county's people (`weight_population`) and of its livable land (`weight_livable`) in each reference unit.
+
+The scripts read each crosswalk file as text and add the two columns after `weight`, so every other column stays exactly as it was. The map of livable land covers the contiguous United States; the two columns are empty for Alaska and Hawaii. The data corrections are listed in `towns.py` and `population_weights.py`.
 
 ## A crosswalk between any two maps
 

@@ -26,7 +26,7 @@ display "1900 population before mapping: " %15.0fc r(sum)
 
 * 3. Merge on GISJOIN. Each 1900 county gets one row per 2010 county it overlaps.
 *    Report the units that do not match before dropping them: they are not on the NHGIS 1900 map
-*    (here 70 units, 12 of them with population data: 30,552 people, about half in Alexandria City, Virginia).
+*    (here 69 units, 11 of them with population data: 16,024 people).
 merge 1:m GISJOIN using `cw', keep(master match)
 quietly count if _merge == 1
 local n_units = r(N)
