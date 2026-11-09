@@ -1,5 +1,5 @@
 * Map 1900 county population from NHGIS to 2010 counties with the EGLP crosswalk.
-* Eckert, Gvirtz, Liang, Peters, NBER WP 26770, www.fpeckert.me/eglp
+* Eckert, Gvirtz, Liang, Peters, working paper, 2026, www.fpeckert.me/eglp
 *
 * Run from the repository root:   do Example/crosswalk_example.do
 * Reads  Crosswalks/Stata/county_crosswalk_endyr_2010.dta.zip

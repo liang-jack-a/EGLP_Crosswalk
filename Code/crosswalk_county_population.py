@@ -1,7 +1,7 @@
 """Add the livable-area and population-based weights to the county crosswalk (1990 or 2010 counties).
 
 Eckert, Gvirtz, Liang, Peters, "A Method to Construct Geographical Crosswalks
-with an Application to US Counties since 1790", NBER WP 26770. www.fpeckert.me/eglp
+with an Application to US Counties since 1790", working paper, 2026. www.fpeckert.me/eglp
 
 Usage (from the repository root), after crosswalk_county.py, livable_land.py and towns.py:
     python Code/crosswalk_county_population.py --end-year 2010

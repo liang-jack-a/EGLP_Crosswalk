@@ -1,6 +1,6 @@
 # EGLP_Crosswalk
 
-Code and crosswalks for Eckert, Gvirtz, Liang and Peters, "A Method to Construct Geographical Crosswalks with an Application to US Counties since 1790", NBER Working Paper 26770 (2020). The paper and the shapefiles are at [www.fpeckert.me/eglp](https://www.fpeckert.me/eglp).
+Code and crosswalks for Eckert, Gvirtz, Liang and Peters, "A Method to Construct Geographical Crosswalks with an Application to US Counties since 1790", working paper, November 2026. An earlier version appeared as NBER Working Paper 26770 (2020). The paper and the 1990 commuting zone shapefile are at [www.fpeckert.me/eglp](https://www.fpeckert.me/eglp).
 
 This repository is the home of the crosswalk files and code; the website links here.
 
@@ -101,4 +101,5 @@ They add the columns `weight_livable` and `weight_population` to the three cross
 
 - `weight_livable` is now the share of the historical county's livable land in every row. Before, it spread the county's census count over its livable land, so map units without a census count (229 county-years of 179 map units) got their share of grid cells instead. This changes `weight_livable` in 174 of these county-years in the 2010 county file, 106 in the 1990 county file and 94 in the commuting zone file. No other value changed by more than 1 in 100 million.
 - `Crosswalks/README_crosswalks.md` lists the data corrections and the errors we know remain.
+- The README and the scripts cite the November 2026 version of the paper.
 
