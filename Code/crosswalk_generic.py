@@ -1,7 +1,7 @@
 """Build a crosswalk between any two maps of the same territory.
 
 Eckert, Gvirtz, Liang, Peters, "A Method to Construct Geographical Crosswalks
-with an Application to US Counties since 1790", NBER WP 26770. www.fpeckert.me/eglp
+with an Application to US Counties since 1790", working paper, 2026. www.fpeckert.me/eglp
 
 Fill in the values in ALL_CAPS below (see Appendix B of the paper), then run
     python crosswalk_generic.py

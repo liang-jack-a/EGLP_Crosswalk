@@ -25,7 +25,9 @@ reference map. The method:
      people, and the county's other pieces are scaled up to keep its total.
   6. The weight of a unit of the reference map is the share of the county's people placed in it
      (population-based weights) or the share of the county's livable land in it (livable-area weights;
-     steps 1 and 5 only). Weights under one in a million are set to 0 and the others rescaled.
+     steps 1 and 5 only). A county without a census count gets the share of its cells as population-based
+     weights, and a county without livable land the share of its cells as livable-area weights. Weights
+     under one in a million are set to 0 and the others rescaled.
 
 Data corrections (each a census fact; the corrections to the town list are in towns.py):
   - census counts that the NHGIS table lacks for the District of Columbia (1800, 1820, 1860, 1880, 1900);
@@ -81,8 +83,8 @@ def people_by_piece(shapefile_dir, state_names, livable_tif, pop_csv, towns_gpkg
 
     reference: '2010' (2010 counties), '1990' (1990 counties) or 'cz' (1990 commuting zones, which needs
     cz_shp). Returns one row per piece: year, cstart (the county of that year), cref (the unit of the
-    reference map), cells, county_pop (the county's census count), pop_livable (its people spread evenly
-    over its livable land), pop_towns (people in listed towns), pop_towns_cascade (all its people placed
+    reference map), cells, county_pop (the county's census count), livable (its livable land, in cells),
+    pop_towns (people in listed towns), pop_towns_cascade (all its people placed
     by steps 2-4) and depth (how far in km the piece reaches from the nearest line between two counties)."""
 
     # ---- the grid: 500 m cells, each the average of four 250 m squares of livable land
@@ -224,12 +226,12 @@ def people_by_piece(shapefile_dir, state_names, livable_tif, pop_csv, towns_gpkg
         cells = pd.DataFrame({'year': y, 'cstart': ids, 'cref': ref, 'cells': 1,
                               'county_pop': pd.Series(census).reindex(ids).fillna(0).to_numpy(),
                               'pop_area': split(ids, census, zero, np.ones_like(livable))[1],
-                              'pop_livable': split(ids, census, zero, livable)[1],
+                              'livable': livable.astype(np.float64),     # summed in double precision
                               'pop_towns': town_pop, 'pop_towns_cascade': town_pop + rural_pop, 'depth': depth(ids, ref)})
         cells = cells[(cells['cstart'] > 0) & (cells['cref'] > 0)]
         return cells.groupby(['year', 'cstart', 'cref'], as_index=False).agg(
             cells=('cells', 'sum'), county_pop=('county_pop', 'first'), pop_area=('pop_area', 'sum'),
-            pop_livable=('pop_livable', 'sum'), pop_towns=('pop_towns', 'sum'),
+            livable=('livable', 'sum'), pop_towns=('pop_towns', 'sum'),
             pop_towns_cascade=('pop_towns_cascade', 'sum'), depth=('depth', 'max'))
 
     # ---- the reference map (ids of the cells)
@@ -282,7 +284,7 @@ def drop_border_strips(d, km=STRIP_KM):
     d = d.reset_index(drop=True)
     g = d.groupby(['year', 'cstart'])
     strip = (d['depth'] <= km + 1e-9) & (d['pop_towns'] <= 0) & (g['cells'].transform('size') > 1)
-    for col in ['pop_towns_cascade', 'pop_livable']:
+    for col in ['pop_towns_cascade', 'livable']:
         total = d.groupby(['year', 'cstart'])[col].transform('sum')
         d.loc[strip, col] = 0
         kept = d.groupby(['year', 'cstart'])[col].transform('sum')
@@ -314,7 +316,7 @@ def weights(d, reference):
 
     g = d.groupby(['year', 'cstart'])
     cells = g['cells'].transform('sum')
-    for col, w in [('pop_towns_cascade', 'weight_population'), ('pop_livable', 'weight_livable')]:
+    for col, w in [('pop_towns_cascade', 'weight_population'), ('livable', 'weight_livable')]:
         total = g[col].transform('sum')
         d[w] = np.where(total > 0, d[col] / total.where(total > 0, 1), d['cells'] / cells)
     d['weight_area'] = d['cells'] / cells      # the share of the county's cells, used only to keep rows below

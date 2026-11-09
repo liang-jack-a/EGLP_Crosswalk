@@ -1,7 +1,7 @@
 """Build the list of towns, with their populations and locations, used by the population-based weights.
 
 Eckert, Gvirtz, Liang, Peters, "A Method to Construct Geographical Crosswalks
-with an Application to US Counties since 1790", NBER WP 26770. www.fpeckert.me/eglp
+with an Application to US Counties since 1790", working paper, 2026. www.fpeckert.me/eglp
 
 Usage (from the repository root):
     python Code/towns.py

@@ -1,7 +1,7 @@
 """Build the map of livable land used by the livable-area and population-based weights.
 
 Eckert, Gvirtz, Liang, Peters, "A Method to Construct Geographical Crosswalks
-with an Application to US Counties since 1790", NBER WP 26770. www.fpeckert.me/eglp
+with an Application to US Counties since 1790", working paper, 2026. www.fpeckert.me/eglp
 
 Usage (from the repository root):
     python Code/livable_land.py

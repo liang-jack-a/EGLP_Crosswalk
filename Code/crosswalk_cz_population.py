@@ -1,7 +1,7 @@
 """Add the livable-area and population-based weights to the commuting zone crosswalk.
 
 Eckert, Gvirtz, Liang, Peters, "A Method to Construct Geographical Crosswalks
-with an Application to US Counties since 1790", NBER WP 26770. www.fpeckert.me/eglp
+with an Application to US Counties since 1790", working paper, 2026. www.fpeckert.me/eglp
 
 Usage (from the repository root), after crosswalk_cz.py, livable_land.py and towns.py:
     python Code/crosswalk_cz_population.py
