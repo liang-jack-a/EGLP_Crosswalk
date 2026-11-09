@@ -97,3 +97,8 @@ They add the columns `weight_livable` and `weight_population` to the three cross
 - Two more weights in all three crosswalks: `weight_livable` (the share of the historical county's livable land) and `weight_population` (the share of its people), for the contiguous United States. They are built by `Code/livable_land.py`, `Code/towns.py`, `Code/crosswalk_county_population.py` and `Code/crosswalk_cz_population.py`. The columns that were already in the files did not change.
 - New rows: Alexandria city, Virginia, 1900, which has a census count but no polygon on the 1900 map (all three crosswalks), and 52 pieces in the commuting zone file that only the new weights have, because they give each piece of land the commuting zone of its 1990 county. Their area-based `weight` is empty (Alexandria) or 0.
 
+## Changes in November 2026, fourth update
+
+- `weight_livable` is now the share of the historical county's livable land in every row. Before, it spread the county's census count over its livable land, so map units without a census count (229 county-years of 179 map units) got their share of grid cells instead. This changes `weight_livable` in 174 of these county-years in the 2010 county file, 106 in the 1990 county file and 94 in the commuting zone file. No other value changed by more than 1 in 100 million.
+- `Crosswalks/README_crosswalks.md` lists the data corrections and the errors we know remain.
+
