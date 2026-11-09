@@ -79,12 +79,15 @@ def main():
     shp_reporting = shp_reporting.to_crs(crs)
     shp_reference = shp_reference.to_crs(crs)
 
-    # The two ID columns may have the same name (e.g. GEOID in both maps): keep them apart.
+    # The ID columns get fixed names while the script works, so that an ID column called
+    # 'area', 'area_base' or 'weight' is not overwritten by the columns added below. The output
+    # uses the maps' own names, with the suffixes _reporting and _reference when the two names
+    # are the same (e.g. GEOID in both maps) or one of them is 'weight'.
     rep_id, ref_id = reporting_geoid, reference_geoid
-    if rep_id == ref_id:
+    if rep_id == ref_id or 'weight' in (rep_id, ref_id):
         rep_id, ref_id = rep_id + '_reporting', ref_id + '_reference'
-        shp_reporting = shp_reporting.rename(columns={reporting_geoid: rep_id})
-        shp_reference = shp_reference.rename(columns={reference_geoid: ref_id})
+    shp_reporting = shp_reporting.rename(columns={reporting_geoid: 'id_reporting'})
+    shp_reference = shp_reference.rename(columns={reference_geoid: 'id_reference'})
 
     # Step 3: the area of each reporting unit, measured before the overlay.
     shp_reporting['area_base'] = shp_reporting.area
@@ -104,10 +107,11 @@ def main():
 
     # Step 7: rescale so that each reporting unit's weights sum to one. Without this, small gaps
     # where the two maps do not line up exactly would lose a little of each unit.
-    intersect['weight'] = intersect['weight'] / intersect.groupby(rep_id)['weight'].transform('sum')
+    intersect['weight'] = intersect['weight'] / intersect.groupby('id_reporting')['weight'].transform('sum')
 
     # Step 8: save one row per piece: reporting ID, reference ID, weight.
-    output = intersect[[rep_id, ref_id, 'weight']]
+    output = intersect[['id_reporting', 'id_reference', 'weight']].rename(
+        columns={'id_reporting': rep_id, 'id_reference': ref_id})
     output.to_csv(os.path.join(output_path, output_fname), index=False)
     print(f"saved {len(output)} rows to {os.path.join(output_path, output_fname)}")
 

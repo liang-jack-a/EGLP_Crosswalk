@@ -103,3 +103,6 @@ They add the columns `weight_livable` and `weight_population` to the three cross
 - `Crosswalks/README_crosswalks.md` lists the data corrections and the errors we know remain.
 - The README and the scripts cite the November 2026 version of the paper.
 
+## Changes in November 2026, fifth update
+
+- The general script (`Code/crosswalk_generic.py`) works when an ID column is called `area`, `area_base` or `weight`. Before, the columns it adds overwrote such an ID column and it wrote wrong IDs and weights without an error. For other names its output is unchanged, byte for byte.
