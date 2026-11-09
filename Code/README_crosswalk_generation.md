@@ -60,7 +60,7 @@ The scripts read each crosswalk file as text and add the two columns after `weig
 
 - `PATH_REPORTING`, `REPORTING_FNAME`: the folder and file name of the map your data come in.
 - `PATH_REFERENCE`, `REFERENCE_FNAME`: the folder and file name of the map you want the data on.
-- `REPORTING_GEOID`, `REFERENCE_GEOID`: the column in each map that identifies its units. They may have the same name; the output then calls them `<name>_reporting` and `<name>_reference`.
+- `REPORTING_GEOID`, `REFERENCE_GEOID`: the column in each map that identifies its units. They may have the same name; the output then calls them `<name>_reporting` and `<name>_reference`, as it also does when one of them is called `weight`.
 - `OUTPUT_PATH`, `OUTPUT_FNAME`: where to save the crosswalk.
 
 Both maps need a coordinate system (a `.prj` file). The script projects both to one projection before measuring areas: the reporting map's own projection if it preserves areas (an equal-area projection, such as the NHGIS maps' Albers projection), otherwise the worldwide equal-area EPSG:6933. A projection that does not preserve areas, such as Web Mercator, would distort the weights. Set `area_crs` to choose another; for US maps the NHGIS projection `ESRI:102003` is a good choice, because it preserves areas. Set `min_area` to drop slivers, as the county crosswalks do with 10 square meters.
