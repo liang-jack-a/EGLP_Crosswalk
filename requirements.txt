@@ -5,3 +5,6 @@ pyogrio==0.13.0
 pyproj==3.8.0
 pandas==3.1.0
 numpy==2.5.4
+# also for the livable-area and population-based weights
+rasterio==1.5.2
+scipy==1.18.1
